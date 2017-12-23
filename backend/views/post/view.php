@@ -30,14 +30,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'id',
             'title',
-            'content:ntext',
+//            'content:ntext',
             'tags:ntext',
 //            'status',
             ['label' => '状态',
                 'value' => $model->status0->name],
 //            'create_time:datetime',
             ['attribute' => 'create_time', 'value' => date('Y-m-d H:i:s', $model->create_time)],
-            ['attribute' => 'update_time', 'value' => date('Y-m-d H:i:s', $model->create_time)],
+            ['attribute' => 'update_time', 'value' => date('Y-m-d H:i:s', $model->update_time)],
 //            'update_time:datetime',
 //            'author_id',
             ['attribute' => 'author_id', 'value' => $model->author->nickname]

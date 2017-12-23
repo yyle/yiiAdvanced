@@ -20,21 +20,20 @@ use Yii;
  * @property Adminuser $author
  * @property Poststatus $status0
  */
-class Post extends \yii\db\ActiveRecord
-{
+class Post extends \yii\db\ActiveRecord {
+    private $_oldTags;
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'post';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['title', 'content', 'status', 'author_id'], 'required'],
             [['content', 'tags'], 'string'],
@@ -48,8 +47,7 @@ class Post extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'title' => '标题',
@@ -65,24 +63,51 @@ class Post extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getComments()
-    {
+    public function getComments() {
         return $this->hasMany(Comment::className(), ['post_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAuthor()
-    {
+    public function getAuthor() {
         return $this->hasOne(Adminuser::className(), ['id' => 'author_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getStatus0()
-    {
+    public function getStatus0() {
         return $this->hasOne(Poststatus::className(), ['id' => 'status']);
+    }
+
+    public function beforeSave($insert) {
+        if (parent::beforeSave($insert)) {
+            if ($insert) {
+                $this->create_time = time();
+                $this->update_time = time();
+            } else {
+                $this->update_time = time();
+                echo time();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function afterFind() {
+        parent::afterFind();
+        $this->_oldTags = $this->tags;
+    }
+
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        Tag::updateFrequency($this->_oldTags, $this->tags);
+    }
+
+    public function afterDelete() {
+        parent::afterDelete();
+        Tag::updateFrequency($this->tags, '');
     }
 }
